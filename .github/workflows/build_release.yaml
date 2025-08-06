@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (e.g. v1.2.3)'
+        description: "Release version (e.g. v1.2.3)"
         required: true
-        default: 'v0.0.1'
+        default: "v0.0.1"
 
 jobs:
   build:
@@ -54,7 +54,5 @@ jobs:
           tag_name: ${{ github.event.inputs.version }}
           files: |
             dist/**/catsteal-*
-            dist/catsteal-*.sha256
-            dist/catsteal-*.md5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
