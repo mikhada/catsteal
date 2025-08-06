@@ -14,29 +14,47 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-
     steps:
-    - name: Checkout source code
-      uses: actions/checkout@v4
-    - name: Build Binary
-      run: |
-        mkdir -p build
-        gcc -Os -flto -march=native -o build/catsteal src/catsteal.c
-    - name: Test Binary
-      run: |
-        printf '%s\n' "3" | build/catsteal
-        printf '%s\n' "300" | build/catsteal
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: catsteal-${{ matrix.os }}
-        path: build/catsteal
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v2
-      with:
-        files: |
-          build/catsteal-macos
-          build/catsteal-linux
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      - name: Build Binary
+        run: |
+          mkdir -p build
+          gcc -Os -flto -march=native -o build/catsteal-${{ matrix.os }} src/catsteal.c
+      - name: Strip Binary
+        run: |
+          strip build/catsteal-${{ matrix.os }}
+      - name: Test Binary
+        run: |
+          printf '%s\n' "3" | build/catsteal-${{ matrix.os }}
+          printf '%s\n' "300" | build/catsteal-${{ matrix.os }}
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: catsteal-${{ matrix.os }}
+          path: build/catsteal-${{ matrix.os }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+      - name: Generate Checksums
+        run: |
+          cd dist
+          for file in */catsteal-*; do
+            sha256sum "$file" > "$file.sha256"
+            md5sum    "$file" > "$file.md5"
+          done
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          files: |
+            dist/**/catsteal-*
+            dist/catsteal-*.sha256
+            dist/catsteal-*.md5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
