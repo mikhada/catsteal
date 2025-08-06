@@ -4,9 +4,18 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Release version (e.g. v1.2.3)"
+        description: "Release Version (e.g. v1.2.3)"
         required: true
         default: "v0.0.1"
+      title:
+        description: "Release Title"
+        required: true
+        default: "An update"
+      prerelease:
+        description: "Is this a pre-release?"
+        required: true
+        default: true
+        type: boolean
 
 jobs:
   build:
@@ -52,6 +61,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.version }}
+          name: ${{ github.event.inputs.title }}
+          prerelease: ${{ github.event.inputs.prerelease }}
           files: |
             dist/**/catsteal-*
         env:
