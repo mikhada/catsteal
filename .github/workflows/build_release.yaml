@@ -1,0 +1,42 @@
+name: Build Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. v1.2.3)'
+        required: true
+        default: 'v0.0.1'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v4
+    - name: Build Binary
+      run: |
+        mkdir -p build
+        gcc -Os -flto -march=native -o build/catsteal src/catsteal.c
+    - name: Test Binary
+      run: |
+        printf '%s\n' "3" | build/catsteal
+        printf '%s\n' "300" | build/catsteal
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: catsteal-${{ matrix.os }}
+        path: build/catsteal
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          build/catsteal-macos
+          build/catsteal-linux
