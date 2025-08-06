@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Release version (e.g. v1.2.3)"
+        description: 'Release version (e.g. v1.2.3)'
         required: true
-        default: "v0.0.1"
+        default: 'v0.0.1'
 
 jobs:
   build:
@@ -14,7 +14,6 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
-
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
