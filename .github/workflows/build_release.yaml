@@ -18,6 +18,15 @@ on:
         type: boolean
 
 jobs:
+  log_vars:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log Workflow Inputs
+        run: |
+          echo Version: ${{ github.event.inputs.version }}
+          echo Title: ${{ github.event.inputs.title }}
+          echo Pre-Release: ${{ github.event.inputs.prerelease }}
+
   build:
     strategy:
       matrix:
@@ -60,7 +69,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.inputs.version }}"
+          tag_name: ${{ github.event.inputs.version }}
           name: "${{ github.event.inputs.version }}: ${{ github.event.inputs.title }}"
           prerelease: ${{ github.event.inputs.prerelease }}
           files: |
